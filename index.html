@@ -29,7 +29,7 @@ button:hover{background:var(--red);color:#fff;box-shadow:0 0 16px rgba(139,58,43
 .orn{color:var(--red);letter-spacing:.6em;font-size:18px}
 
 /* Custom Intro Overlay */
-#introOverlay{position:fixed;inset:0;background:rgba(12,9,7,0.88);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+#introOverlay{position:fixed;inset:0;background:rgba(12,9,7,0.92);backdrop-filter:blur(8px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}
 .intro-card{position:relative;background:var(--grain),linear-gradient(145deg,var(--page-bg),var(--book-cover));border:1px solid var(--page-border);border-radius:8px;padding:40px 30px 32px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.9);max-width:440px;width:100%}
 .earphone-icon{width:64px;height:64px;margin:0 auto 20px;opacity:0.4;fill:#a39585;display:block}
 .intro-card p{font-size:16px;line-height:1.8;color:var(--text);margin:0 auto 24px;font-style:italic}
@@ -158,14 +158,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
 <!-- Audio Latar Belakang (Loop) -->
 <audio id="bgMusic" src="muzik.mp3" preload="auto" loop></audio>
 
-<!-- Pop-up Amaran Fon Telinga -->
+<!-- Pop-up Amaran Fon Telinga (Menggunakan onclick langsung di HTML) -->
 <div id="introOverlay">
   <div class="intro-card">
     <svg class="earphone-icon" viewBox="0 0 24 24">
       <path d="M12 2C6.48 2 2 6.48 2 12v3c0 1.66 1.34 3 3 3h1v-7H4v-1c0-4.41 3.59-8 8-8s8 3.59 8 8v1h-2v7h1c1.66 0 3-1.34 3-3v-3c0-5.52-4.48-10-10-10zm-8 15h2v3H4v-3zm16 0h2v3h-2v-3z"/>
     </svg>
     <p>“Hayati setiap alunan dengan lebih mendalam, disarankan menggunakan fon telinga.”</p>
-    <button id="startExperienceBtn">Mula Masuk</button>
+    <button onclick="bukaLamanWeb()">Mula Masuk</button>
   </div>
 </div>
 
@@ -296,20 +296,18 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 150);
 });
 
-// Diubah suai supaya skrin pasti tertutup walaupun audio gagal dimainkan
-$("startExperienceBtn").onclick = () => {
-  const music = $("bgMusic");
+// Fungsi langsung untuk butang Mula Masuk
+function bukaLamanWeb() {
+  const music = document.getElementById("bgMusic");
   if (music) {
-    music.play().then(() => {
-      console.log("Muzik dimainkan.");
-    }).catch(err => {
-      console.log("Audio disekat atau fail tidak ditemui:", err);
-    });
+    music.play().catch(err => console.log("Audio disekat:", err));
   }
-  // Pastikan overlay sentiasa ditutup tanpa bergantung pada status muzik
-  $("introOverlay").style.display = "none";
+  const overlay = document.getElementById("introOverlay");
+  if (overlay) {
+    overlay.style.display = "none";
+  }
   document.body.classList.remove("modal-open");
-};
+}
 
 const THEMES=[
   ["Kasih","Tentang hati yang menjaga dan menyayangi."],
