@@ -282,21 +282,35 @@ const THEMES=[
   ["Ilahi","Tentang sujud dan pulang kepada-Nya."],
   ["Murka","Tentang bara api jiwa yang membakar ingkar."]
 ];
-const SAMPLES=[
-  {id:"s0",title:"Cahaya Dada",author:"Rejab",tag:"Kasih",text:"Engkau cahaya kecil\nyang kujaga dalam dada,\ntak padam diterpa malam,\ntak goyah dilanda masa."},
-  {id:"s1",title:"Hujan Mengerti",author:"Rejab",tag:"Duka",text:"Hujan mengerti semuanya\nyang tak sempat terucap,\nlalu menulis di jendelaku\nsurat sunyi yang lelap."},
-  {id:"s2",title:"Sujud Malam",author:"Rejab",tag:"Ilahi",text:"Di hening sepertiga malam\nkuhamparkan segala resahku;\npada-Mu, Tuhan, hati ini pulang\nmembawa luka dan rindu."},
-  {id:"s3",title:"Bara Sumpah",author:"Rejab",tag:"Murka",text:"Bara di dada bukan dendam,\ntapi amuk api kebenaran;\nyang membakar dusta silam\ntanpa sisa, tanpa kasihan."}
-];
 
-let POEMS=[],favs=[],ratings={},currentFilter="Semua",searchQuery="",activeModalPoemId=null;
+let SAMPLES = [];
+let POEMS=[], favs=[], ratings={}, currentFilter="Semua", searchQuery="", activeModalPoemId=null;
 const $=i=>document.getElementById(i);
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||d)}catch(e){return JSON.parse(d)}};
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 favs=ld("favs_rejab","[]");
-POEMS=ld("mypoems_rejab","[]");
 ratings=ld("ratings_rejab","{}");
+
+// Muat turun data puisi secara langsung dari fail puisi.json di pelayan GitHub
+async function initPoemApp() {
+  try {
+    const response = await fetch('puisi.json');
+    const data = await response.json();
+    
+    if (data.poems) {
+      POEMS = data.poems;
+      SAMPLES = data.samples || [];
+    } else if (Array.isArray(data)) {
+      POEMS = data;
+    }
+  } catch (error) {
+    console.log("Gagal memuatkan fail puisi.json, menggunakan storan tempatan.");
+    POEMS = ld("mypoems_rejab","[]");
+  }
+  render();
+}
+
 const list=()=>[...SAMPLES,...POEMS];
 
 /* Export JSON */
@@ -451,7 +465,6 @@ function closePoemModal(){
 
 $("closePoemModal").onclick = closePoemModal;
 
-/* Close Modal on Click Outside */
 $("poemModal").onclick = (e) => {
   const rect = $("poemModal").getBoundingClientRect();
   const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
@@ -632,7 +645,8 @@ $("ws").onclick=()=>{
  render();
 };
 
-render();
+// Mulakan aplikasi dengan memuatkan data puisi
+initPoemApp();
 </script>
 </body>
 </html>
