@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>REJAB – Dakwat &amp; Bara</title>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Pinyon+Script&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- Firebase App & Realtime Database CDN (Compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 <style>
 :root{
   color-scheme: dark;
@@ -38,7 +43,7 @@ button:hover{background:var(--red);color:#fff;box-shadow:0 0 16px rgba(139,58,43
 .menu-container{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;z-index:60}
 .menu-btn{background:rgba(30,25,21,0.75);backdrop-filter:blur(6px);border:1px solid var(--page-border);color:var(--text);border-radius:8px;padding:8px 14px;font-size:18px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:all .2s}
 .menu-btn:hover{background:rgba(139,58,43,0.8);color:#fff;border-color:var(--red)}
-.menu-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:rgba(30,25,21,0.95);backdrop-filter:blur(10px);border:1px solid var(--page-border);border-radius:8px;padding:6px;width:180px;box-shadow:0 10px 25px rgba(0,0,0,0.7)}
+.menu-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:rgba(30,25,21,0.95);backdrop-filter:blur(10px);border:1px solid var(--page-border);border-radius:8px;padding:6px;width:200px;box-shadow:0 10px 25px rgba(0,0,0,0.7)}
 .menu-dropdown button{width:100%;text-align:left;border:none;border-radius:4px;padding:8px 12px;font-size:13px;letter-spacing:.05em;color:var(--text);background:transparent}
 .menu-dropdown button:hover{background:var(--red);color:#fff;box-shadow:none}
 .menu-container:hover .menu-dropdown, .menu-container:focus-within .menu-dropdown{display:block}
@@ -64,7 +69,6 @@ h1{font-family:'Pinyon Script',cursive;font-weight:400;font-size:clamp(54px,11vw
 .silhouette-right{top:10%;right:8%;width:170px;transform:translate(120px, -60px) rotate(10deg)}
 .paper-left{top:55%;left:5%;width:210px;transform:translate(-150px, 80px) rotate(-8deg)}
 .paper-right{top:52%;right:5%;width:220px;transform:translate(150px, 80px) rotate(12deg)}
-.hero-fly-item.in{opacity:1;transform:translate(0, 0) rotate(var(--rot, 0deg))}
 
 .scrap-card{background:rgba(35,29,24,0.9);border:1px solid #544436;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.6);border-radius:3px}
 .scrap-card img{width:100%;height:auto;display:block;filter:sepia(60%) contrast(115%) brightness(85%);border:1px solid #3d3127}
@@ -124,7 +128,7 @@ h1{font-family:'Pinyon Script',cursive;font-weight:400;font-size:clamp(54px,11vw
 .acts .fv.on{color:var(--red)}
 .empty{color:var(--mute);font-style:italic;padding:30px;grid-column:1/-1}
 
-/* Poem Focus View Modal (Popup) */
+/* Modals & Dialogs */
 #poemModal{border:none;background:transparent;padding:0;max-width:680px;width:92%;max-height:90vh;overflow:visible}
 #poemModal::backdrop{background:rgba(12,9,7,0.85);backdrop-filter:blur(8px)}
 .poem-modal-card{position:relative;background:var(--grain),linear-gradient(145deg,var(--page-bg),var(--book-cover));border:1px solid var(--page-border);border-radius:6px;outline:1px solid #4a3d31;outline-offset:-10px;padding:50px 40px 40px;box-shadow:0 20px 60px rgba(0,0,0,0.9);max-height:85vh;display:flex;flex-direction:column}
@@ -158,7 +162,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
 <!-- Audio Latar Belakang (Loop) -->
 <audio id="bgMusic" src="muzik.mp3" preload="auto" loop></audio>
 
-<!-- Pop-up Amaran Fon Telinga (Menggunakan onclick langsung di HTML) -->
+<!-- Pop-up Amaran Fon Telinga -->
 <div id="introOverlay">
   <div class="intro-card">
     <svg class="earphone-icon" viewBox="0 0 24 24">
@@ -175,12 +179,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
   <div class="menu-dropdown">
     <button id="importBtn">📤 Import JSON</button>
     <button id="exportBtn">📥 Eksport JSON</button>
+    <button id="adminQueueBtn">🛡️ Admin Moderation</button>
   </div>
 </div>
 <input type="file" id="importFileInput" accept=".json" style="display:none">
 
 <!-- Floating Calligraphy Fountain Pen Button -->
-<button id="wr" title="Karang puisi baharu">
+<button id="wr" title="Hantar puisi baharu (Guest Submissions)">
   <svg viewBox="0 0 24 24"><path d="M15.707 2.293a1 1 0 0 1 1.414 0l4.586 4.586a1 1 0 0 1 0 1.414l-9.5 9.5a1 1 0 0 1-.45.26l-6 1.5a1 1 0 0 1-1.213-1.213l1.5-6a1 1 0 0 1 .26-.45l9.5-9.5zM14 6l4 4-9 9H5v-4l9-9z"/></svg>
 </button>
 
@@ -188,7 +193,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
 
 <!-- Hero Section -->
 <section class="hero" id="home">
-
   <div class="hero-fly-item silhouette-left scrap-card" style="--rot:-6deg">
     <img src="https://drive.google.com/thumbnail?id=1uOj0eS1GpGFZMO9yK_zcr7TjomYSA7in&sz=w600" alt="Siluet Rejab - Profil">
     <div class="cap">REJAB</div>
@@ -223,7 +227,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
     </div>
     <div class="hint">Tatal ke bawah ↓</div>
   </div>
-
 </section>
 
 <!-- Filter Bar & Search -->
@@ -243,13 +246,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
 
 <div id="babs"></div>
 
-<footer>© Ditulis oleh Rejab dengan kasih</footer>
+<footer>© Ditulis oleh Rejab & Pembaca dengan kasih</footer>
 
-<!-- Write/Edit Modal -->
+<!-- Write/Submit Modal (Guest Submissions) -->
 <dialog id="wd">
-  <h2 id="modalTitle">Karang Puisi</h2>
+  <h2 id="modalTitle">Hantar Puisi Baharu</h2>
   <input type="hidden" id="editId">
-  <input id="wa" placeholder="Nama Penulis / Nama Pena" value="Rejab" maxlength="40">
+  <input id="wa" placeholder="Nama Penulis / Nama Pena" value="Tetamu" maxlength="40">
   <input id="wt" placeholder="Tajuk Puisi" maxlength="80">
   <select id="wg">
     <option value="Kasih">Kasih</option>
@@ -257,9 +260,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
     <option value="Ilahi">Ilahi</option>
     <option value="Murka">Murka</option>
   </select>
-  <textarea id="wx" placeholder="Tulis bait puisi anda di sini…"></textarea>
+  <textarea id="wx" placeholder="Tulis bait puisi anda di sini (Akan melalui semakan admin sebelum diterbitkan)…"></textarea>
   <div class="row2">
-    <button id="ws">Terbitkan</button>
+    <button id="ws">Hantar untuk Semakan</button>
     <button id="wc">Batal</button>
   </div>
 </dialog>
@@ -280,14 +283,38 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);box
     <div class="acts">
       <div class="acts-left">
         <button class="fv" id="modalFvBtn">♥</button>
-        <button class="editBtn" id="modalEditBtn">✏️ Edit</button>
+        <button class="editBtn" id="modalEditBtn">✏️ Sunting</button>
       </div>
       <button class="del" id="modalDelBtn">Padam</button>
     </div>
   </div>
 </dialog>
 
+<!-- Admin Moderation Queue Modal -->
+<dialog id="adminModal" style="max-width: 700px;">
+  <h2>Admin Moderation Queue</h2>
+  <p style="text-align:center; color:var(--mute); font-size:14px; margin-bottom:20px;">Semak karya tetamu yang dihantar sebelum diterbitkan ke laman utama.</p>
+  <div id="pendingListContainer" style="max-height: 400px; overflow-y: auto; display:flex; flex-direction:column; gap:16px; padding-right:6px;"></div>
+  <div class="row2" style="margin-top:20px;">
+    <button onclick="$('adminModal').close()">Tutup</button>
+  </div>
+</dialog>
+
 <script>
+// --- FIREBASE CONFIGURATION & INITIALIZATION ---
+const firebaseConfig = {
+  apiKey: "AIzaSyAbcA0KiSW6H6fPsd3_tqefsEgx6ea8_0A",
+  authDomain: "rejab-dakwat-bara.firebaseapp.com",
+  databaseURL: "https://rejab-dakwat-bara-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rejab-dakwat-bara",
+  storageBucket: "rejab-dakwat-bara.firebasestorage.app",
+  messagingSenderId: "589730787254",
+  appId: "1:589730787254:web:26ab1c6b14c8ca68e89b17"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     document.querySelectorAll(".hero-fly-item").forEach(el => {
@@ -296,7 +323,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 150);
 });
 
-// Fungsi langsung untuk butang Mula Masuk
 function bukaLamanWeb() {
   const music = document.getElementById("bgMusic");
   if (music) {
@@ -316,7 +342,11 @@ const THEMES=[
   ["Murka","Tentang bara api jiwa yang membakar ingkar."]
 ];
 
-let SAMPLES = [];
+let SAMPLES = [
+  {id:"s1", author:"Rejab", title:"Cahaya di Sebalik Malam", tag:"Kasih", text:"Malam merangkak perlahan,\nmembawa angin rindu yang panjang.\nDi sebalik gelap yang menawan,\nada doa tersimpul tenang.", created: Date.now()-86400000},
+  {id:"s2", author:"Rejab", title:"Jeda Waktu", tag:"Duka", text:"Sunyi merajai ruang bilik,\ntinggal bayang tanpa suara.\nHati berbisik penuh rintih,\nmenanti terang menyapa jiwa.", created: Date.now()-43200000}
+];
+
 let POEMS=[], favs=[], ratings={}, currentFilter="Semua", searchQuery="", activeModalPoemId=null;
 const $=i=>document.getElementById(i);
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||d)}catch(e){return JSON.parse(d)}};
@@ -325,25 +355,26 @@ const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 favs=ld("favs_rejab","[]");
 ratings=ld("ratings_rejab","{}");
 
-async function initPoemApp() {
-  try {
-    const response = await fetch('puisi.json');
-    const data = await response.json();
-    
-    if (data.poems) {
-      POEMS = data.poems;
-      SAMPLES = data.samples || [];
-    } else if (Array.isArray(data)) {
-      POEMS = data;
+// --- SYNC WITH FIREBASE REALTIME DATABASE ---
+function initPoemApp() {
+  // Listen for public published poems in Firebase
+  db.ref('poems').on('value', (snapshot) => {
+    const val = snapshot.val();
+    if (val) {
+      // Convert Firebase object to array
+      POEMS = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+    } else {
+      POEMS = SAMPLES; // fallback if empty
     }
-  } catch (error) {
-    console.log("Gagal memuatkan fail puisi.json, menggunakan storan tempatan.");
-    POEMS = ld("mypoems_rejab","[]");
-  }
-  render();
+    render();
+  }, (error) => {
+    console.error("Gagal memuatkan Firebase poems:", error);
+    POEMS = SAMPLES;
+    render();
+  });
 }
 
-const list=()=>[...SAMPLES,...POEMS];
+const list=()=>[...POEMS];
 
 /* Export JSON */
 $("exportBtn").onclick = () => {
@@ -388,8 +419,10 @@ $("importFileInput").onchange = (e) => {
     try {
       const imported = JSON.parse(event.target.result);
       if (imported.poems && Array.isArray(imported.poems)) {
-        POEMS = imported.poems;
-        sv("mypoems_rejab", POEMS);
+        // Push imported poems to Firebase
+        imported.poems.forEach(p => {
+          db.ref('poems/' + p.id).set(p);
+        });
       }
       if (imported.favorites && Array.isArray(imported.favorites)) {
         favs = imported.favorites;
@@ -399,13 +432,81 @@ $("importFileInput").onchange = (e) => {
         ratings = imported.ratings;
         sv("ratings_rejab", ratings);
       }
-      alert("Data puisi berjaya diimport!");
-      render();
+      alert("Data puisi berjaya diimport ke Firebase!");
     } catch (err) {
       alert("Format fail JSON tidak sah.");
     }
   };
   reader.readAsText(file);
+};
+
+// --- ADMIN MODERATION QUEUE ---
+$("adminQueueBtn").onclick = () => {
+  const pwd = prompt("Masukkan kata laluan Admin:");
+  if (pwd === null) return;
+  if (pwd === "080975") {
+    loadPendingQueue();
+    $("adminModal").showModal();
+  } else {
+    alert("Kata laluan salah.");
+  }
+};
+
+function loadPendingQueue() {
+  const container = $("pendingListContainer");
+  container.innerHTML = "<p style='text-align:center; color:var(--mute);'>Memuatkan senarai tertangguh...</p>";
+  
+  db.ref('pending_poems').once('value', snapshot => {
+    const val = snapshot.val();
+    container.innerHTML = "";
+    if(!val) {
+      container.innerHTML = "<p style='text-align:center; color:var(--mute); font-style:italic;'>Tiada puisi dalam senarai tertangguh.</p>";
+      return;
+    }
+    
+    Object.keys(val).forEach(key => {
+      const p = val[key];
+      const div = document.createElement("div");
+      div.style.background = "#16120f";
+      div.style.border = "1px solid #4a3d31";
+      div.style.padding = "16px";
+      div.style.borderRadius = "6px";
+      div.innerHTML = `
+        <div style="font-size:12px; color:var(--red); text-transform:uppercase; margin-bottom:4px;">${p.tag} • Oleh: ${p.author}</div>
+        <h4 style="font-family:'Caveat',cursive; font-size:24px; color:#f0e4d4; margin:0 0 8px;">${p.title}</h4>
+        <div style="font-size:13px; color:var(--mute); white-space:pre-line; max-height:100px; overflow:hidden; margin-bottom:12px;">${p.text}</div>
+        <div style="display:flex; gap:10px;">
+          <button onclick="approvePoem('${key}')" style="background:var(--red); border:none; padding:6px 16px; font-size:12px;">Release to Publish</button>
+          <button onclick="rejectPoem('${key}')" style="background:transparent; border:1px solid var(--mute); color:var(--mute); padding:6px 16px; font-size:12px;">Tolak</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  });
+}
+
+window.approvePoem = (key) => {
+  db.ref('pending_poems/' + key).once('value', snapshot => {
+    const poemData = snapshot.val();
+    if(poemData) {
+      // Save to main published poems node
+      db.ref('poems/' + key).set(poemData).then(() => {
+        // Remove from pending
+        db.ref('pending_poems/' + key).remove();
+        alert("Puisi telah diluluskan dan diterbitkan!");
+        loadPendingQueue();
+      });
+    }
+  });
+};
+
+window.rejectPoem = (key) => {
+  if(confirm("Adakah anda pasti mahu memadam/menolak puisi ini?")) {
+    db.ref('pending_poems/' + key).remove().then(() => {
+      alert("Puisi ditolak.");
+      loadPendingQueue();
+    });
+  }
 };
 
 function setRating(poemId, rate, e){
@@ -451,9 +552,7 @@ function openPoemModal(p){
     render();
   };
   
-  const isSample = /^s\d$/.test(p.id);
   const editBtn = $("modalEditBtn");
-  editBtn.style.display = isSample ? "none" : "inline-block";
   editBtn.onclick = (e) => {
     e.stopPropagation();
     const pwd = prompt("Masukkan kata laluan untuk mengedit puisi:");
@@ -474,14 +573,12 @@ function openPoemModal(p){
   };
   
   const delBtn = $("modalDelBtn");
-  delBtn.style.display = isSample ? "none" : "inline-block";
   delBtn.onclick = async (e) => {
     e.stopPropagation();
-    if(!confirm("Padam puisi ini?")) return;
-    POEMS = POEMS.filter(x => x.id !== p.id);
-    sv("mypoems_rejab", POEMS);
-    closePoemModal();
-    render();
+    if(!confirm("Padam puisi ini dari pangkalan data?")) return;
+    db.ref('poems/' + p.id).remove().then(() => {
+      closePoemModal();
+    });
   };
   
   $("poemModal").showModal();
@@ -523,9 +620,9 @@ function letter(p,i){
    <div class="acts">
      <div class="acts-left">
        <button class="fv ${favs.includes(p.id)?'on':''}">♥</button>
-       <button class="editBtn" ${/^s\d$/.test(p.id)?'style="display:none"':''}>✏️ Edit</button>
+       <button class="editBtn">✏️ Sunting</button>
      </div>
-     <button class="del" ${/^s\d$/.test(p.id)?'style="display:none"':''}>Padam</button>
+     <button class="del">Padam</button>
    </div>`;
 
  const rContainer = d.querySelector(".rating-container");
@@ -560,8 +657,8 @@ function letter(p,i){
  };
 
  const del=d.querySelector(".del");
- del.onclick=async e=>{e.stopPropagation();if(!confirm("Padam puisi ini?"))return;
- POEMS=POEMS.filter(x=>x.id !== p.id);sv("mypoems_rejab",POEMS);render()};
+ del.onclick=async e=>{e.stopPropagation();if(!confirm("Padam puisi ini dari pangkalan data?"))return;
+ db.ref('poems/' + p.id).remove()};
  
  d.onclick = () => openPoemModal(p);
  d.dataset.id=p.id;
@@ -643,12 +740,12 @@ $("rnd").onclick=()=>{const L=list(),p=L[Math.floor(Math.random()*L.length)];
 };
 
 $("wr").onclick=()=>{
- $("modalTitle").textContent = "Karang Puisi";
+ $("modalTitle").textContent = "Hantar Puisi Baharu";
  $("editId").value = "";
  $("wt").value = $("wx").value = "";
- $("wa").value = "Rejab";
+ $("wa").value = "Tetamu";
  $("wg").value = "Kasih";
- $("ws").textContent = "Terbitkan";
+ $("ws").textContent = "Hantar untuk Semakan";
  $("wd").showModal();
 };
 
@@ -656,7 +753,7 @@ $("wc").onclick=()=>$("wd").close();
 
 $("ws").onclick=()=>{
  const id = $("editId").value;
- const author = $("wa").value.trim()||"Rejab";
+ const author = $("wa").value.trim()||"Tetamu";
  const title = $("wt").value.trim();
  const text = $("wx").value.trim();
  const tg = $("wg").value;
@@ -664,15 +761,20 @@ $("ws").onclick=()=>{
  if(!title||!text){$("wt").focus();return}
  
  if(id){
-   POEMS = POEMS.map(p => p.id === id ? {...p, author, title, tag: tg, text} : p);
+   // Admin editing an existing published poem directly
+   const updated = { author, title, tag: tg, text };
+   db.ref('poems/' + id).update(updated).then(() => {
+     $("wd").close();
+   });
  } else {
-   const p = {id:"l"+Date.now(), author, title, tag:tg, text, created:Date.now()};
-   POEMS = [p, ...POEMS];
- }
- 
- sv("mypoems_rejab",POEMS);
- $("wd").close();
- render();
+   // Guest submission goes to pending queue
+   const newId = "l" + Date.now();
+   const p = { id: newId, author, title, tag: tg, text, created: Date.now() };
+   db.ref('pending_poems/' + newId).set(p).then(() => {
+     alert("Puisi anda telah dihantar dan menunggu kelulusan admin sebelum disiarkan.");
+     $("wd").close();
+   });
+ };
 };
 
 initPoemApp();
