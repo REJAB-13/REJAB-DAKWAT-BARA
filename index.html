@@ -64,6 +64,7 @@ h1{font-family:'Pinyon Script',cursive;font-weight:400;font-size:clamp(54px,11vw
 
 /* Fly-In Hero Elements */
 .hero-fly-item{position:absolute;z-index:5;opacity:0;transition:all 1.6s cubic-bezier(0.16, 1, 0.3, 1)}
+.hero-fly-item.in{opacity:1;transform:translate(0,0) rotate(var(--rot,0deg))}
 .silhouette-left{top:12%;left:8%;width:180px;transform:translate(-120px, -60px) rotate(-12deg)}
 .silhouette-right{top:10%;right:8%;width:170px;transform:translate(120px, -60px) rotate(10deg)}
 .paper-left{top:55%;left:5%;width:210px;transform:translate(-150px, 80px) rotate(-8deg)}
